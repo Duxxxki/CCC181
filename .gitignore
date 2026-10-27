@@ -1,4 +1,17 @@
+# Node.js dependencies
 node_modules/
+
+# Environment variables and secrets
 .env
+.env.*
+!.env.example
+
+# Test output
 coverage/
-npm-debug.log*
+
+# Logs
+*.log
+
+# Operating system files
+.DS_Store
+Thumbs.db
