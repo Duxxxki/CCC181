@@ -2,12 +2,12 @@
 -- PostgreSQL database dump
 --
 
-\restrict daeQLXQTDhrNAhufowsj0rveaFE5wyYIYDqpo1im07WlB5yOSuQ274PToBf1rgZ
+\restrict PfzjB40VnuElG1Sl0W4KFkwzedvFmjNeSQgnFgZG1xrob5ct4xSw25FbZKewFuW
 
 -- Dumped from database version 18.3
 -- Dumped by pg_dump version 18.3
 
--- Started on 2026-10-27 23:28:48
+-- Started on 2026-10-28 02:50:31
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -26,27 +26,28 @@ SET default_tablespace = '';
 SET default_table_access_method = heap;
 
 --
--- TOC entry 220 (class 1259 OID 25221)
+-- TOC entry 220 (class 1259 OID 16760)
 -- Name: users; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.users (
-    id integer NOT NULL,
-    name character varying(100) NOT NULL,
+    id bigint NOT NULL,
+    full_name character varying(150) NOT NULL,
     email character varying(255) NOT NULL,
     password_hash text NOT NULL,
-    role character varying(20) NOT NULL,
-    status character varying(20) DEFAULT 'Active'::character varying NOT NULL,
+    role character varying(20) DEFAULT 'employee'::character varying NOT NULL,
+    status character varying(20) DEFAULT 'active'::character varying NOT NULL,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    CONSTRAINT users_role_check CHECK (((role)::text = ANY ((ARRAY['Admin'::character varying, 'Staff'::character varying])::text[]))),
-    CONSTRAINT users_status_check CHECK (((status)::text = ANY ((ARRAY['Active'::character varying, 'Inactive'::character varying])::text[])))
+    CONSTRAINT full_name_not_empty CHECK ((length(TRIM(BOTH FROM full_name)) > 0)),
+    CONSTRAINT users_role_check CHECK (((role)::text = ANY ((ARRAY['admin'::character varying, 'employee'::character varying])::text[]))),
+    CONSTRAINT users_status_check CHECK (((status)::text = ANY ((ARRAY['active'::character varying, 'inactive'::character varying])::text[])))
 );
 
 
 ALTER TABLE public.users OWNER TO postgres;
 
 --
--- TOC entry 219 (class 1259 OID 25220)
+-- TOC entry 219 (class 1259 OID 16759)
 -- Name: users_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -61,7 +62,7 @@ ALTER TABLE public.users ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
 
 
 --
--- TOC entry 4861 (class 2606 OID 25240)
+-- TOC entry 4863 (class 2606 OID 16781)
 -- Name: users users_email_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -70,7 +71,7 @@ ALTER TABLE ONLY public.users
 
 
 --
--- TOC entry 4863 (class 2606 OID 25238)
+-- TOC entry 4865 (class 2606 OID 16779)
 -- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -78,11 +79,11 @@ ALTER TABLE ONLY public.users
     ADD CONSTRAINT users_pkey PRIMARY KEY (id);
 
 
--- Completed on 2026-10-27 23:28:48
+-- Completed on 2026-10-28 02:50:31
 
 --
 -- PostgreSQL database dump complete
 --
 
-\unrestrict daeQLXQTDhrNAhufowsj0rveaFE5wyYIYDqpo1im07WlB5yOSuQ274PToBf1rgZ
+\unrestrict PfzjB40VnuElG1Sl0W4KFkwzedvFmjNeSQgnFgZG1xrob5ct4xSw25FbZKewFuW
 
