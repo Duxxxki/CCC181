@@ -1,11 +1,17 @@
 const express = require("express");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 const pool = require("./db");
 
 const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Check JWT configuration
+if (!process.env.JWT_SECRET) {
+    throw new Error("JWT_SECRET is missing from the .env file.");
+}
 
 // Test route
 app.get("/", (req, res) => {
@@ -77,6 +83,79 @@ app.post("/api/users", async (req, res) => {
         }
 
         console.error("Account creation error:", error.message);
+
+        return res.status(500).json({
+            message: "An unexpected error occurred."
+        });
+    }
+});
+
+// US-3: Login with JWT
+app.post("/api/auth/login", async (req, res) => {
+    try {
+        const email = req.body.email?.trim().toLowerCase();
+        const password = req.body.password;
+
+        // Validate required fields
+        if (!email || typeof password !== "string" || !password) {
+            return res.status(400).json({
+                message: "Email and password are required."
+            });
+        }
+
+        // Find user by email
+        const result = await pool.query(
+            `SELECT id, full_name, email, password_hash, role, status
+             FROM users
+             WHERE email = $1`,
+            [email]
+        );
+
+        const user = result.rows[0];
+
+        // Reject unknown email or incorrect password
+        if (
+            !user ||
+            !(await bcrypt.compare(password, user.password_hash))
+        ) {
+            return res.status(401).json({
+                message: "Invalid email or password."
+            });
+        }
+
+        // Reject inactive accounts
+        if (user.status !== "active") {
+            return res.status(403).json({
+                message: "Your account is inactive. Please contact an administrator."
+            });
+        }
+
+        // Generate signed JWT
+        const token = jwt.sign(
+            {
+                id: user.id,
+                role: user.role
+            },
+            process.env.JWT_SECRET,
+            {
+                expiresIn: "1h",
+                algorithm: "HS256"
+            }
+        );
+
+        return res.status(200).json({
+            message: "Login successful.",
+            token,
+            user: {
+                id: user.id,
+                full_name: user.full_name,
+                email: user.email,
+                role: user.role
+            }
+        });
+
+    } catch (error) {
+        console.error("Login error:", error.message);
 
         return res.status(500).json({
             message: "An unexpected error occurred."
