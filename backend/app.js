@@ -1,12 +1,23 @@
 const express = require("express");
+const path = require("path");
+const cookieParser = require("cookie-parser");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const pool = require("./db");
 
 const app = express();
+app.use(express.static(path.join(__dirname, "../frontend")));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+
+const cookieOptions = {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/"
+};
 
 // Check JWT configuration
 if (!process.env.JWT_SECRET) {
@@ -23,6 +34,27 @@ app.get("/", (req, res) => {
 // US-1: Create Employee Account
 app.post("/api/users", async (req, res) => {
     try {
+                // Admin only: verify the logged-in user
+        let currentUser;
+        try {
+            const payload = jwt.verify(req.cookies.token, process.env.JWT_SECRET, {
+                algorithms: ["HS256"]
+            });
+            const adminResult = await pool.query(
+                "SELECT role, status FROM users WHERE id = $1",
+                [payload.id]
+            );
+            currentUser = adminResult.rows[0];
+        } catch (authError) {
+            return res.status(401).json({ message: "Not authenticated." });
+        }
+
+        if (!currentUser || currentUser.status !== "active") {
+            return res.status(401).json({ message: "Not authenticated." });
+        }
+        if (currentUser.role !== "admin") {
+            return res.status(403).json({ message: "Only administrators can create accounts." });
+        }
         const fullName = req.body.fullName?.trim();
         const email = req.body.email?.trim().toLowerCase();
         const password = req.body.password;
@@ -143,9 +175,12 @@ app.post("/api/auth/login", async (req, res) => {
             }
         );
 
+        // Store JWT in an httpOnly cookie (used by dashboard.js)
+        res.cookie("token", token, { ...cookieOptions, maxAge: 60 * 60 * 1000 });
+
         return res.status(200).json({
             message: "Login successful.",
-            token,
+            redirect: "/dashboard",
             user: {
                 id: user.id,
                 full_name: user.full_name,
@@ -161,6 +196,50 @@ app.post("/api/auth/login", async (req, res) => {
             message: "An unexpected error occurred."
         });
     }
+});
+
+// Current user (used by dashboard.js)
+app.get("/api/auth/me", async (req, res) => {
+    try {
+        const token = req.cookies.token;
+        if (!token) {
+            return res.status(401).json({ message: "Not authenticated." });
+        }
+
+        const payload = jwt.verify(token, process.env.JWT_SECRET, {
+            algorithms: ["HS256"]
+        });
+
+        const result = await pool.query(
+            `SELECT id, full_name, email, role, status
+             FROM users WHERE id = $1`,
+            [payload.id]
+        );
+        const user = result.rows[0];
+
+        if (!user || user.status !== "active") {
+            return res.status(401).json({ message: "Not authenticated." });
+        }
+
+        res.set("Cache-Control", "no-store");
+        return res.status(200).json({ user });
+    } catch (error) {
+        return res.status(401).json({ message: "Not authenticated." });
+    }
+});
+
+// Logout
+app.post("/api/auth/logout", (req, res) => {
+    res.clearCookie("token", cookieOptions);
+    res.status(200).json({ message: "Logged out." });
+});
+
+// Pages without .html
+app.get("/dashboard", (req, res) => {
+    res.sendFile(path.join(__dirname, "../frontend/dashboard.html"));
+});
+app.get("/login", (req, res) => {
+    res.sendFile(path.join(__dirname, "../frontend/login.html"));
 });
 
 // Handle unknown routes
