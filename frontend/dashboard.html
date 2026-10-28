@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Workspace | JH Studios</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/dashboard.js" defer></script>
+</head>
+<body class="dashboard-page">
+  <header class="topbar">
+    <a class="dashboard-brand" href="/dashboard"><span class="brand-mark small">JH</span><span>JH STUDIOS</span></a>
+    <nav id="main-nav" aria-label="Main navigation"><a class="active" href="/dashboard">Workspace</a><a id="user-management-link" href="#create-user-panel" hidden>User Management</a></nav>
+    <button class="secondary-button" id="logout-button" type="button">Log Out</button>
+  </header>
+  <main class="dashboard-content">
+    <p class="eyebrow">YOUR WORKSPACE</p>
+    <h1 id="welcome-heading">Welcome</h1>
+    <p class="supporting-text" id="role-label">Loading your account...</p>
+    <section class="workspace-panel">
+      <div><h2>Tasks</h2><p class="panel-subtitle">Your assigned work will appear here.</p></div>
+      <div class="empty-state"><div class="empty-icon" aria-hidden="true">—</div><h3>No tasks assigned yet.</h3><p>When tasks are assigned to you, they will appear in this section.</p></div>
+    </section>
+
+    <section class="workspace-panel" id="create-user-panel" hidden>
+      <div><h2>Create Employee Account</h2><p class="panel-subtitle">New accounts are created with the default employee role.</p></div>
+      <form id="create-user-form" class="user-form" novalidate>
+        <div class="form-field">
+          <label for="new-full-name">Full Name</label>
+          <input id="new-full-name" name="fullName" type="text" maxlength="150" autocomplete="off" required>
+        </div>
+        <div class="form-field">
+          <label for="new-email">Work Email</label>
+          <input id="new-email" name="email" type="email" maxlength="255" autocomplete="off" placeholder="name@jhstudios.com" required>
+        </div>
+        <div class="form-field">
+          <label for="new-password">Temporary Password</label>
+          <input id="new-password" name="password" type="password" autocomplete="new-password" placeholder="At least 12 characters" required>
+        </div>
+        <p class="form-message" id="create-user-message" role="alert" aria-live="polite"></p>
+        <button class="primary-button" id="create-user-button" type="submit">Create Account</button>
+      </form>
+    </section>
+
+    <p class="form-message" id="dashboard-message" role="alert" aria-live="polite"></p>
+  </main>
+</body>
+</html>

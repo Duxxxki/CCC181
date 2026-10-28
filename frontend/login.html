@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Log In | JH Studios</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/login.js" defer></script>
+</head>
+<body class="auth-page">
+  <main class="login-card">
+    <div class="brand-mark" aria-hidden="true">JH</div>
+    <p class="eyebrow">JH STUDIOS</p>
+    <h1>Welcome Back</h1>
+    <p class="supporting-text">Log in to access your workspace.</p>
+
+    <form id="login-form" novalidate>
+      <div class="form-field">
+        <label for="email">Work Email</label>
+        <input id="email" name="email" type="email" autocomplete="username" placeholder="name@jhstudios.com" required>
+        <p class="field-error" id="email-error" aria-live="polite"></p>
+      </div>
+      <div class="form-field">
+        <label for="password">Password</label>
+        <div class="password-wrap">
+          <input id="password" name="password" type="password" autocomplete="current-password" placeholder="Enter your password" required>
+          <button class="show-password" type="button" id="toggle-password" aria-label="Show password">Show</button>
+        </div>
+        <p class="field-error" id="password-error" aria-live="polite"></p>
+      </div>
+      <p class="form-message" id="form-message" role="alert" aria-live="polite"></p>
+      <button class="primary-button" id="login-button" type="submit">Log In</button>
+    </form>
+    <p class="forgot-placeholder">Forgot password? <span>Contact your administrator.</span></p>
+    <p class="security-note">Authorized users only</p>
+  </main>
+</body>
+</html>
